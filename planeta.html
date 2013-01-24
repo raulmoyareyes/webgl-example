@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<title>Ejemplo Three.js</title>
+		<meta charset="utf-8">
+		<style>
+			body {
+				color: yellow;
+				font-family:Monospace;
+				font-size:13px;
+				text-align:center;
+
+				background-color: #1a0126;
+				margin: 0px;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="info">Opciones:<br/>
+		Luces:
+		<a onclick="directlight.position.set(0, 1, 0).normalize();">arriba</a> |
+		<a onclick="directlight.position.set(1, 1, 0).normalize();">derecha</a> |
+		<a onclick="directlight.position.set(0, 1, 1).normalize();">izquierda</a> | <br/>
+		Tiempo:
+		<a onclick="speed = -0.002 ;">rapido</a> |
+		<a onclick="speed = -0.00002 ;">lento</a> |<br/>
+		<a onclick="speed = -0.0002 ;">normal</a> |<br/>
+		</div>
+		
+		<div id="container"></div>
+
+		<script src="libs/three/three.min.js"></script>
+		<script src="libs/stats/stats.min.js"></script>
+		
+		<script>
+
+			// Página de ayuda
+			// threejsdoc.appspot.com/ --> ayuda
+
+			var container, stats;
+			var camera, scene, renderer, speed;
+			var lightmesh, pointlight, ambientlight, directlight;
+			var mouseX = 0, mouseY = 0;
+
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+			
+			init();
+			animate();
+			
+
+			function init() {
+
+				container = document.getElementById('container');   //definimos contenedor para la escena
+				scene = new THREE.Scene();  //creamos la escena
+				camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 10000);  //creamos la camara
+				//parametros --> angulo,aspecto,near,far ;)   near y far serían el plano cercano y lejano, definiendo el volumen de visión
+				
+				camera.position.z = 500; //definimos posicion de la camara en el eje z
+				
+				scene.add(camera); //añadimos la camara a la escena
+	
+				speed = -0.002; //velocidad por defecto
+
+				// luces - parametros --> hex, intensidad y distancia, los 2 últimos por defecto (1,0)
+				pointlight = new THREE.PointLight(0xFFFFFF); // luz puntual
+				ambientlight = new THREE.AmbientLight(0x5a3d02); // luz ambiental
+				directlight = new THREE.DirectionalLight(0xFFFFFF, 1); // luz directa
+				
+				directlight.position.set(1, 1, 0).normalize();
+
+				// Añadimos las luces a las escena
+				scene.add(pointlight);
+				scene.add(ambientlight);
+				scene.add(directlight);
+
+				// Planeta pequeño  
+				var sphere1 = new THREE.SphereGeometry(30, 16, 8);// Geometria
+				var material1 = new THREE.MeshPhongMaterial( {color: 0xFFAA00});// material - modelo de Phong --> modelo de iluminación y sombreado que asigna brillo a los puntos de una sup modelada ;)
+				lightmesh = new THREE.Mesh(sphere1, material1); // objeto tipo malla
+				lightmesh.position = pointlight.position; // Posicion de la luz;
+				scene.add(lightmesh); // añadimos planeta pequeño a la escena
+
+				// Planeta grande
+				var sphere2 = new THREE.SphereGeometry(100, 32, 32); // Geometría
+				var material2 = new THREE.MeshPhongMaterial({ambient: 0x002665, color: 0x0060ff, specular: 0x555555, shininess: 10}); //material
+				// 
+				addMesh(sphere2, 1, 0, 0, 0, 0, 0, 0, material2);
+
+				// Renderizado
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize(window.innerWidth, window.innerHeight);
+				container.appendChild(renderer.domElement);
+
+				// Estadisticas (Fps)
+				stats = new Stats();
+				stats.domElement.style.position = 'absolute';
+				stats.domElement.style.top = '0px';
+				container.appendChild(stats.domElement);
+
+				// Eventos mover el raton y redimensionado de ventana
+				document.addEventListener('mousemove', onDocumentMouseMove, false);
+				window.addEventListener('resize', onWindowResize, false);
+			}
+			
+			function addMesh(geometry, scale, x, y, z, rx, ry, rz, material){
+				
+				mesh = new THREE.Mesh(geometry, material);
+				mesh.scale.set(scale, scale, scale);
+				mesh.position.set(x, y, z);
+				mesh.rotation.set(rx, ry, rz);
+				scene.add(mesh);
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame(animate);
+				render();
+				stats.update();
+
+			}
+
+			function render() {
+	
+
+				var timer = speed * Date.now();
+
+				// posicion de la camara segun el raton
+				camera.position.x += ( mouseX - camera.position.x) * .05;
+				camera.position.y += ( - mouseY - camera.position.y) * .05;
+
+				camera.lookAt(scene.position);
+
+				// movimiento de la orbita
+				lightmesh.position.x = 300 * Math.cos(timer);
+				lightmesh.position.z = 300 * Math.sin(timer);
+
+				renderer.render(scene, camera);
+
+			}
+
+			function onWindowResize() {
+
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize(window.innerWidth, window.innerHeight);
+
+			}
+
+			function onDocumentMouseMove(event) {
+
+				mouseX = (event.clientX - windowHalfX);
+				mouseY = (event.clientY - windowHalfY);
+
+			}
+		</script>
+	</body>
+</html>

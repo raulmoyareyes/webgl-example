@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<title>Cubo WebGL</title>
+		<meta charset="utf-8">
+	</head>
+	<body>
+
+	<script src="libs/three/three.min.js"></script>
+
+	<script>
+	 
+	    var camera, scene, renderer,
+	    geometry, material, mesh;
+	 
+	    init();
+	    animate();
+	 
+
+
+	    function init() {
+	        scene = new THREE.Scene(); // creamos la escena
+	 
+	        camera = new THREE.PerspectiveCamera( 
+	        	75, window.innerWidth / window.innerHeight, 1, 10000 
+	        	); // creamos la camara
+
+	        camera.position.z = 1000; // posicion para la camara
+	 
+	        geometry = new THREE.CubeGeometry( 200, 200, 200 ); // dibujar un cubo
+
+	        material = new THREE.MeshBasicMaterial( 
+	        	{ color: 0xff0000, wireframe: true } 
+	        	); // elegir el material para el cubo
+	 
+	        mesh = new THREE.Mesh( geometry, material ); // creamos una malla con la 
+	        						//forma geométrica y el material antes elegidos
+
+	        scene.add( mesh ); // añadimos la malla a la escena
+	 
+	        renderer = new THREE.CanvasRenderer(); // creamos la ventana
+
+	        renderer.setSize( window.innerWidth, window.innerHeight ); // tamaño de la ventana
+	 
+	        document.body.appendChild( renderer.domElement ); // añadimos el canvas al html
+	    }
+
+
+	 
+	    function animate() {
+	        requestAnimationFrame( animate );
+	        render();
+	    }
+	 
+	    function render() {
+	    	// crear una animación de rotacion
+	        mesh.rotation.x += 0.01;
+	        mesh.rotation.y += 0.02;
+	 
+	        renderer.render( scene, camera );
+	    }
+
+
+	 
+	</script>
+
+	</body>
+</html>
